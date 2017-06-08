@@ -2638,7 +2638,7 @@ case "${target}" in
 	subdirs="$subdirs wince"
 
 	;;
-  mips*-*-*)
+  mips*-*-* | nanomips*-*-*)
 	subdirs="$subdirs mips"
 
 	;;

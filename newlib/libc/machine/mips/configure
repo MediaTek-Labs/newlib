@@ -584,6 +584,8 @@ PACKAGE_URL=''
 ac_unique_file="setjmp.S"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+NANOMIPS_FALSE
+NANOMIPS_TRUE
 sys_dir
 shared_machine_dir
 machine_dir
@@ -3516,6 +3518,15 @@ OBJEXT=${oext}
 
 
 
+ if test "$host_cpu" = "nanomips"; then
+  NANOMIPS_TRUE=
+  NANOMIPS_FALSE='#'
+else
+  NANOMIPS_TRUE='#'
+  NANOMIPS_FALSE=
+fi
+
+
 
 ac_config_files="$ac_config_files Makefile"
 
@@ -3707,6 +3718,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_LIBTOOL_TRUE}" && test -z "${USE_LIBTOOL_FALSE}"; then
   as_fn_error $? "conditional \"USE_LIBTOOL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${NANOMIPS_TRUE}" && test -z "${NANOMIPS_FALSE}"; then
+  as_fn_error $? "conditional \"NANOMIPS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

@@ -131,13 +131,23 @@ SECTIONS
     *(.gnu.linkonce.d.*)
   }
   . = ALIGN(8);
-  _gp = . + 0x8000;
+  _gp = . + 0;
   __global = _gp;
   .lit8 : {
     *(.lit8)
   }
   .lit4 : {
     *(.lit4)
+  }
+  .ssdata : {
+    *(.ssdata)
+    *(.ssdata.*)
+    *(.gnu.linkonce.ss.*)
+  }
+  .ssbss : {
+    *(.ssbss)
+    *(.ssbss.*)
+    *(.gnu.linkonce.ssb.*)
   }
   .sdata : {
     *(.sdata)

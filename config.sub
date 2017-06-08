@@ -2,7 +2,7 @@
 # Configuration validation subroutine script.
 #   Copyright 1992-2021 Free Software Foundation, Inc.
 
-timestamp='2021-01-08'
+timestamp='2022-01-06'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -1217,6 +1217,7 @@ case $cpu-$vendor in
 			| moxie \
 			| mt \
 			| msp430 \
+			| nanomips \
 			| nds32 | nds32le | nds32be \
 			| nfp \
 			| nios | nios2 | nios2eb | nios2el \
@@ -1566,8 +1567,8 @@ case $cpu-$vendor in
 	mips*-cisco)
 		os=elf
 		;;
-	mips*-*)
-		os=elf
+	mips*-* | nanomips*-*)
+		os=-elf
 		;;
 	or32-*)
 		os=coff
