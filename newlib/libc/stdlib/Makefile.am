@@ -68,6 +68,7 @@ GENERAL_SOURCES = \
 	wcstoimax.c	\
 	wcstol.c	\
 	wcstoul.c	\
+	wcstoumax.c	\
 	wcstombs.c	\
 	wcstombs_r.c	\
 	wctomb.c	\
