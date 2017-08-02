@@ -323,6 +323,7 @@ extern intmax_t  _strtoimax_r(struct _reent *, const char *__restrict, char **__
 extern uintmax_t strtoumax(const char *__restrict, char **__restrict, int);
 extern uintmax_t _strtoumax_r(struct _reent *, const char *__restrict, char **__restrict, int);
 extern intmax_t  wcstoimax(const wchar_t *__restrict, wchar_t **__restrict, int);
+extern intmax_t  _wcstoimax_r(struct _reent *, const wchar_t *__restrict, wchar_t **__restrict, int);
 extern uintmax_t wcstoumax(const wchar_t *__restrict, wchar_t **__restrict, int);
 
 #ifdef __cplusplus
