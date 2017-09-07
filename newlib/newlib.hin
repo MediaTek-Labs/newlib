@@ -82,6 +82,9 @@
 /* Define if small footprint nano-formatted-IO implementation used.  */
 #undef _NANO_FORMATTED_IO
 
+/* Define to use type long for time_t.  */
+#undef _WANT_USE_LONG_TIME_T
+
 /*
  * Iconv encodings enabled ("to" direction)
  */
