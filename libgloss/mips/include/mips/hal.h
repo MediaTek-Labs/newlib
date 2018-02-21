@@ -116,7 +116,10 @@
 #define CTX_BADINSTR	((CTX_REG(34))+CTX_HILO_SIZE+SZPTR+8)
 #define CTX_BADPINSTR	((CTX_REG(34))+CTX_HILO_SIZE+SZPTR+12)
 #define CTX_BADINSTRP	((CTX_REG(34))+CTX_HILO_SIZE+SZPTR+12)
+<<<<<<< HEAD
 #define CTX_BADINSTRX	((CTX_REG(34))+CTX_HILO_SIZE+SZPTR+12)
+=======
+>>>>>>> a3035a6... GT-132 [3/5]: Add macros to m32c0.h as found in v6.04 PRA.
 #define CTX_SIZE	((CTX_REG(34))+CTX_HILO_SIZE+SZPTR+16)
 
 #if _MIPS_SIM==_ABIP32 || _MIPS_SIM==_ABIP64
@@ -319,7 +322,6 @@ struct gpctx
   /* These fields should be considered read-only */
   uint32_t cause;
   uint32_t badinstr;
-  uint32_t badpinstr;
   union
   {
     uint32_t badpinstr;

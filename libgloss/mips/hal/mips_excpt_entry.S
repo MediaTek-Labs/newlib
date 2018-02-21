@@ -142,11 +142,11 @@ ANESTED(__exception_save, _mips_general_exception, CTX_SIZEROUND + ADJ, zero)
 	/* MIPSR6 guarantees all CP0 regs are defined to at
 	   least return zero.  */
 #endif
-	/* nanoMIPS never has BADPINSTR so don't read it.  */
+	/* nanoMIPS never has BADINSTRP so don't read it.  */
 #ifdef __nanomips__
 	mfc0	t0, C0_BADINSTRX
 #else
-	mfc0	t0, C0_BADPINSTR
+	mfc0	t0, C0_BADINSTRP
 #endif
 #if __mips_isa_rev < 6
 1:
