@@ -32,11 +32,9 @@ details. */
 #define FE_SSE_EXCEPT_MASK_SHIFT (7)
 
 /* These are writable so we can initialise them at startup.  */
-static fenv_t fe_dfl_env;
 static fenv_t fe_nomask_env;
 
 /* These pointers provide the outside world with read-only access to them.  */
-const fenv_t *_fe_dfl_env = &fe_dfl_env;
 const fenv_t *_fe_nomask_env = &fe_nomask_env;
 
 /*  Although Cygwin assumes i686 or above (hence SSE available) these
@@ -413,7 +411,8 @@ fesetprec (int prec)
 void
 _feinitialise (void)
 {
-  unsigned int edx, eax, mxcsr;
+  unsigned int edx, eax;
+  extern fenv_t __fe_dfl_env;
 
   /* Check for presence of SSE: invoke CPUID #1, check EDX bit 25.  */
   eax = 1;
@@ -439,6 +438,6 @@ _feinitialise (void)
   fedisableexcept (FE_ALL_EXCEPT);
 
   /* Finally cache state as default environment. */
-  fegetenv (&fe_dfl_env);
+  fegetenv (&__fe_dfl_env);
 }
 
