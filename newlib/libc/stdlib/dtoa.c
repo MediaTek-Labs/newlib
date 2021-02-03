@@ -231,6 +231,7 @@ _dtoa_r (struct _reent *ptr,
 
   d.d = _d;
 
+#ifndef USE_MALLOC_DTOA
   _REENT_CHECK_MP(ptr);
   if (_REENT_MP_RESULT(ptr))
     {
@@ -239,6 +240,7 @@ _dtoa_r (struct _reent *ptr,
       Bfree (ptr, _REENT_MP_RESULT(ptr));
       _REENT_MP_RESULT(ptr) = 0;
     }
+#endif
 
   if (word0 (d) & Sign_bit)
     {
@@ -263,6 +265,9 @@ _dtoa_r (struct _reent *ptr,
 	!word1 (d) && !(word0 (d) & 0xfffff) ? "Infinity" :
 #endif
 	"NaN";
+#ifdef USE_MALLOC_DTOA
+      s = _strdup_r (ptr, s);
+#endif
       if (rve)
 	*rve =
 #ifdef IEEE_Arith
@@ -279,6 +284,9 @@ _dtoa_r (struct _reent *ptr,
     {
       *decpt = 1;
       s = "0";
+#ifdef USE_MALLOC_DTOA
+      s = _strdup_r (ptr, s);
+#endif
       if (rve)
 	*rve = s + 1;
       return s;
@@ -419,12 +427,16 @@ _dtoa_r (struct _reent *ptr,
       if (i <= 0)
 	i = 1;
     }
+#ifndef USE_MALLOC_DTOA
   j = sizeof (__ULong);
   for (_REENT_MP_RESULT_K(ptr) = 0; sizeof (_Bigint) - sizeof (__ULong) + j <= i;
        j <<= 1)
     _REENT_MP_RESULT_K(ptr)++;
   _REENT_MP_RESULT(ptr) = eBalloc (ptr, _REENT_MP_RESULT_K(ptr));
   s = s0 = (char *) _REENT_MP_RESULT(ptr);
+#else
+  s = s0 = _malloc_r (ptr, i);
+#endif
 
   if (ilim >= 0 && ilim <= Quick_max && try_quick)
     {

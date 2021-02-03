@@ -1379,6 +1379,10 @@ float_number:
 			cp = cvt (data, _fpvalue, prec, flags, &softsign,
 				  &expt, ch, &ndig, cp);
 
+# ifdef USE_MALLOC_DTOA
+			malloc_buf = cp;
+# endif
+
 			if (ch == 'g' || ch == 'G') {
 				if (expt <= -4 || expt > prec)
 					ch -= 2; /* 'e' or 'E' */

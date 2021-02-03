@@ -2807,6 +2807,7 @@ _ldtoa_r (struct _reent *ptr, long double d, int mode, int ndigits,
   rnd.rlast = -1;
   rnd.rndprc = NBITS;
 
+#ifndef USE_MALLOC_DTOA
   _REENT_CHECK_MP (ptr);
 
 /* reentrancy addition to use mprec storage pool */
@@ -2817,6 +2818,7 @@ _ldtoa_r (struct _reent *ptr, long double d, int mode, int ndigits,
       Bfree (ptr, _REENT_MP_RESULT (ptr));
       _REENT_MP_RESULT (ptr) = 0;
     }
+#endif
 
 #if LDBL_MANT_DIG == 24
   e24toe (&du.pe, e, ldp);
@@ -2947,6 +2949,7 @@ stripspaces:
   else				/* account for sign + max precision digs + E + exp sign + exponent */
     i = orig_ndigits + MAX_EXP_DIGITS + 4;
 
+#ifndef USE_MALLOC_DTOA
   j = sizeof (__ULong);
   for (_REENT_MP_RESULT_K (ptr) = 0;
        sizeof (_Bigint) - sizeof (__ULong) + j <= i; j <<= 1)
@@ -2956,6 +2959,9 @@ stripspaces:
 /* Copy from internal temporary buffer to permanent buffer.  */
   outstr = (char *) _REENT_MP_RESULT (ptr);
   strcpy (outstr, outbuf);
+#else
+  outstr = _strdup_r (ptr, outbuf);
+#endif
 
   if (rve)
     *rve = outstr + (s - outbuf);

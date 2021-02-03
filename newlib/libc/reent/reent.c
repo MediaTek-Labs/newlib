@@ -45,6 +45,7 @@ _reclaim_reent (struct _reent *ptr)
 {
   if (ptr != _impure_ptr)
     {
+#ifndef USE_MALLOC_DTOA
       /* used by mprec routines. */
 #ifdef _REENT_SMALL
       if (ptr->_mp)	/* don't bother allocating it! */
@@ -73,12 +74,15 @@ _reclaim_reent (struct _reent *ptr)
 #ifdef _REENT_SMALL
       }
 #endif
+#endif
 
 #ifdef _REENT_SMALL
       if (ptr->_emergency)
 	_free_r (ptr, ptr->_emergency);
+#ifndef USE_MALLOC_DTOA
       if (ptr->_mp)
 	_free_r (ptr, ptr->_mp);
+#endif
       if (ptr->_r48)
 	_free_r (ptr, ptr->_r48);
       if (ptr->_localtime_buf)

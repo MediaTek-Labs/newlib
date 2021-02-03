@@ -99,6 +99,7 @@ Balloc (struct _reent *ptr, int k)
   int x;
   _Bigint *rv ;
 
+#ifndef USE_MALLOC_DTOA
   _REENT_CHECK_MP(ptr);
   if (_REENT_MP_FREELIST(ptr) == NULL)
     {
@@ -117,6 +118,7 @@ Balloc (struct _reent *ptr, int k)
       _REENT_MP_FREELIST(ptr)[k] = rv->_next;
     }
   else
+#endif
     {
       x = 1 << k;
       /* Allocate an mprec Bigint and stick in in the freelist */
@@ -135,12 +137,16 @@ Balloc (struct _reent *ptr, int k)
 void
 Bfree (struct _reent *ptr, _Bigint * v)
 {
+#ifndef USE_MALLOC_DTOA
   _REENT_CHECK_MP(ptr);
   if (v)
     {
       v->_next = _REENT_MP_FREELIST(ptr)[v->_k];
       _REENT_MP_FREELIST(ptr)[v->_k] = v;
     }
+#else
+  _free_r (ptr, v);
+#endif
 }
 
 _Bigint *
@@ -427,6 +433,7 @@ pow5mult (struct _reent * ptr, _Bigint * b, int k)
 
   if (!(k >>= 2))
     return b;
+#ifndef USE_MALLOC_DTOA
   _REENT_CHECK_MP(ptr);
   if (!(p5 = _REENT_MP_P5S(ptr)))
     {
@@ -434,6 +441,9 @@ pow5mult (struct _reent * ptr, _Bigint * b, int k)
       p5 = _REENT_MP_P5S(ptr) = i2b (ptr, 625);
       p5->_next = 0;
     }
+#else
+  p5 = i2b (ptr, 625);
+#endif
   for (;;)
     {
       if (k & 1)
@@ -444,13 +454,22 @@ pow5mult (struct _reent * ptr, _Bigint * b, int k)
 	}
       if (!(k >>= 1))
 	break;
+#ifndef USE_MALLOC_DTOA
       if (!(p51 = p5->_next))
 	{
 	  p51 = p5->_next = mult (ptr, p5, p5);
 	  p51->_next = 0;
 	}
+#else
+      p51 = mult (ptr, p5, p5);
+      Bfree (ptr, p5);
+#endif
       p5 = p51;
     }
+
+#ifdef USE_MALLOC_DTOA
+    Bfree (ptr, p5);
+#endif
   return b;
 }
 
