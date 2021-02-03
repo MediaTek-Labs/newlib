@@ -180,6 +180,7 @@ _printf_float (struct _reent *data,
   /* Actual number of digits returned by cvt.  */
   int ndig = 0;
   char *cp;
+  char *malloc_buf = NULL;
   int n;
   /* Field size expanded by dprec(not for _printf_float).  */
   int realsz;
@@ -235,6 +236,10 @@ _printf_float (struct _reent *data,
 
   cp = __cvt (data, _fpvalue, pdata->prec, pdata->flags, &softsign,
 	      &expt, code, &ndig, cp);
+
+#ifdef USE_MALLOC_DTOA
+  malloc_buf = cp;
+#endif
 
   if (code == 'g' || code == 'G')
     {
@@ -354,8 +359,16 @@ print_float:
   if (pdata->flags & LADJUST)
     PAD (pdata->width - realsz, pdata->blank);
 
+#ifdef USE_MALLOC_DTOA
+  if (malloc_buf)
+    _free_r (data, malloc_buf);
+#endif
   return (pdata->width > realsz ? pdata->width : realsz);
 error:
+#ifdef USE_MALLOC_DTOA
+  if (malloc_buf)
+    _free_r (data, malloc_buf);
+#endif
   return -1;
 
 #undef _fpvalue

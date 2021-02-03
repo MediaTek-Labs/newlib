@@ -341,6 +341,7 @@ struct _rand48 {
 
 #ifdef _REENT_SMALL
 
+#ifndef USE_MALLOC_DTOA
 struct _mprec
 {
   /* used by mprec routines */
@@ -349,6 +350,10 @@ struct _mprec
   struct _Bigint *_p5s;
   struct _Bigint **_freelist;
 };
+#define _REENT_INIT_MP_ZERO _NULL,
+#else
+#define _REENT_INIT_MP_ZERO
+#endif
 
 
 struct _misc_reent
@@ -389,7 +394,9 @@ struct _reent
   int _unspecified_locale_info;	/* unused, reserved for locale stuff */
   struct __locale_t *_locale;/* per-thread locale */
 
+#ifndef USE_MALLOC_DTOA
   struct _mprec *_mp;
+#endif
 
   void _EXFNPTR(__cleanup, (struct _reent *));
 
@@ -432,7 +439,7 @@ extern const struct __sFILE_fake __sf_fake_stderr;
     0, \
     0, \
     _NULL, \
-    _NULL, \
+    _REENT_INIT_MP_ZERO \
     _NULL, \
     0, \
     0, \
@@ -499,6 +506,7 @@ extern const struct __sFILE_fake __sf_fake_stderr;
 #define _REENT_CHECK_RAND48(var) \
   _REENT_CHECK(var, _r48, struct _rand48 *, sizeof *((var)->_r48), _REENT_INIT_RAND48((var)))
 
+#ifndef USE_MALLOC_DTOA
 #define _REENT_INIT_MP(var) do { \
   struct _reent *_r = (var); \
   _r->_mp->_result_k = 0; \
@@ -507,6 +515,7 @@ extern const struct __sFILE_fake __sf_fake_stderr;
 } while (0)
 #define _REENT_CHECK_MP(var) \
   _REENT_CHECK(var, _mp, struct _mprec *, sizeof *((var)->_mp), _REENT_INIT_MP(var))
+#endif
 
 #define _REENT_CHECK_EMERGENCY(var) \
   _REENT_CHECK(var, _emergency, char *, _REENT_EMERGENCY_SIZE, /* nothing */)
@@ -544,10 +553,12 @@ extern const struct __sFILE_fake __sf_fake_stderr;
 #define _REENT_RAND48_SEED(ptr)	((ptr)->_r48->_seed)
 #define _REENT_RAND48_MULT(ptr)	((ptr)->_r48->_mult)
 #define _REENT_RAND48_ADD(ptr)	((ptr)->_r48->_add)
+#ifndef USE_MALLOC_DTOA
 #define _REENT_MP_RESULT(ptr)	((ptr)->_mp->_result)
 #define _REENT_MP_RESULT_K(ptr)	((ptr)->_mp->_result_k)
 #define _REENT_MP_P5S(ptr)	((ptr)->_mp->_p5s)
 #define _REENT_MP_FREELIST(ptr)	((ptr)->_mp->_freelist)
+#endif
 #define _REENT_ASCTIME_BUF(ptr)	((ptr)->_asctime_buf)
 #define _REENT_TM(ptr)		((ptr)->_localtime_buf)
 #define _REENT_EMERGENCY(ptr)	((ptr)->_emergency)
@@ -586,11 +597,13 @@ struct _reent
 
   void _EXFNPTR(__cleanup, (struct _reent *));
 
+#ifndef USE_MALLOC_DTOA
   /* used by mprec routines */
   struct _Bigint *_result;
   int _result_k;
   struct _Bigint *_p5s;
   struct _Bigint **_freelist;
+#endif
 
   /* used by some fp conversion routines */
   int _cvtlen;			/* should be size_t */
@@ -647,6 +660,16 @@ struct _reent
   __FILE __sf[3];  		/* first three file descriptors */
 };
 
+#ifndef USE_MALLOC_DTOA
+#define _REENT_INIT_MP_ZERO \
+        _NULL, \
+        0, \
+        _NULL, \
+        _NULL,
+#else
+#define _REENT_INIT_MP_ZERO
+#endif
+
 #define _REENT_INIT(var) \
   { 0, \
     &(var).__sf[0], \
@@ -655,10 +678,7 @@ struct _reent
     0, \
     "", \
     0, \
-    _NULL, \
-    0, \
-    _NULL, \
-    _NULL, \
+    _REENT_INIT_MP_ZERO \
     0, \
     _NULL, \
     _NULL, \
@@ -710,7 +730,9 @@ struct _reent
   }
 
 #define _REENT_CHECK_RAND48(ptr)	/* nothing */
+#ifndef USE_MALLOC_DTOA
 #define _REENT_CHECK_MP(ptr)		/* nothing */
+#endif
 #define _REENT_CHECK_TM(ptr)		/* nothing */
 #define _REENT_CHECK_ASCTIME_BUF(ptr)	/* nothing */
 #define _REENT_CHECK_EMERGENCY(ptr)	/* nothing */
@@ -722,10 +744,12 @@ struct _reent
 #define _REENT_RAND48_SEED(ptr)	((ptr)->_new._reent._r48._seed)
 #define _REENT_RAND48_MULT(ptr)	((ptr)->_new._reent._r48._mult)
 #define _REENT_RAND48_ADD(ptr)	((ptr)->_new._reent._r48._add)
+#ifndef USE_MALLOC_DTOA
 #define _REENT_MP_RESULT(ptr)	((ptr)->_result)
 #define _REENT_MP_RESULT_K(ptr)	((ptr)->_result_k)
 #define _REENT_MP_P5S(ptr)	((ptr)->_p5s)
 #define _REENT_MP_FREELIST(ptr)	((ptr)->_freelist)
+#endif
 #define _REENT_ASCTIME_BUF(ptr)	((ptr)->_new._reent._asctime_buf)
 #define _REENT_TM(ptr)		(&(ptr)->_new._reent._localtime_buf)
 #define _REENT_EMERGENCY(ptr)	((ptr)->_emergency)

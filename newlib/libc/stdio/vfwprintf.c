@@ -1654,6 +1654,9 @@ wcvt(struct _reent *data, _PRINTF_FLOAT_TYPE value, int ndigits, int flags,
 	  for (i = 0; i < *length && i < len; ++i)
 	    buf[i] = (wchar_t) digits[i];
 #endif
+#ifdef USE_MALLOC_DTOA
+	  _free_r (data, digits);
+#endif
 	  return buf;
 	}
 }

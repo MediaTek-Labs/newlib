@@ -93,6 +93,9 @@ _DEFUN (print_f, (ptr, buf, invalue, ndigit, type, dot, mode),
   if (decpt == 9999)
     {
       strcpy (buf, p);
+#ifdef USE_MALLOC_DTOA
+      _free_r (ptr, start);
+#endif
       return;
     }
   while (*p && decpt > 0)
@@ -133,6 +136,9 @@ _DEFUN (print_f, (ptr, buf, invalue, ndigit, type, dot, mode),
 	}
     }
   *buf++ = 0;
+#ifdef USE_MALLOC_DTOA
+  _free_r (ptr, start);
+#endif
 }
 
 /* Print number in e format with width chars after.
@@ -153,16 +159,19 @@ _DEFUN (print_e, (ptr, buf, invalue, width, type, dot),
 {
   int sign;
   char *end;
-  char *p;
+  char *p, *start;
   int decpt;
   int top;
   int ndigit = width;
 
-  p = _dtoa_r (ptr, invalue, 2, width + 1, &decpt, &sign, &end);
+  start = p = _dtoa_r (ptr, invalue, 2, width + 1, &decpt, &sign, &end);
 
   if (decpt == 9999)
     {
       strcpy (buf, p);
+#ifdef USE_MALLOC_DTOA
+      _free_r (ptr, start);
+#endif
       return;
     }
 
@@ -217,6 +226,9 @@ _DEFUN (print_e, (ptr, buf, invalue, width, type, dot),
   *buf++ = decpt + '0';
 
   *buf++ = 0;
+#ifdef USE_MALLOC_DTOA
+  _free_r (ptr, start);
+#endif
 }
 
 #ifndef _REENT_ONLY
@@ -235,7 +247,7 @@ _DEFUN (fcvtbuf, (invalue, ndigit, decpt, sign, fcvt_buf),
 {
   struct _reent *reent = _REENT;
   char *save;
-  char *p;
+  char *p, *start;
   char *end;
   int done = 0;
 
@@ -257,11 +269,11 @@ _DEFUN (fcvtbuf, (invalue, ndigit, decpt, sign, fcvt_buf),
 
   if (invalue < 1.0 && invalue > -1.0)
     {
-      p = _dtoa_r (reent, invalue, 2, ndigit, decpt, sign, &end);
+      start = p = _dtoa_r (reent, invalue, 2, ndigit, decpt, sign, &end);
     }
   else
     {
-      p = _dtoa_r (reent, invalue, 3, ndigit, decpt, sign, &end);
+      start = p = _dtoa_r (reent, invalue, 3, ndigit, decpt, sign, &end);
     }
 
   /* Now copy */
@@ -279,6 +291,9 @@ _DEFUN (fcvtbuf, (invalue, ndigit, decpt, sign, fcvt_buf),
       done++;
     }
   *fcvt_buf++ = 0;
+#ifdef USE_MALLOC_DTOA
+  _free_r (reent, start);
+#endif
   return save;
 }
 
@@ -292,7 +307,7 @@ _DEFUN (ecvtbuf, (invalue, ndigit, decpt, sign, fcvt_buf),
 {
   struct _reent *reent = _REENT;
   char *save;
-  char *p;
+  char *p, start;
   char *end;
   int done = 0;
 
@@ -312,7 +327,7 @@ _DEFUN (ecvtbuf, (invalue, ndigit, decpt, sign, fcvt_buf),
 
   save = fcvt_buf;
 
-  p = _dtoa_r (reent, invalue, 2, ndigit, decpt, sign, &end);
+  start = p = _dtoa_r (reent, invalue, 2, ndigit, decpt, sign, &end);
 
   /* Now copy */
 
@@ -328,6 +343,9 @@ _DEFUN (ecvtbuf, (invalue, ndigit, decpt, sign, fcvt_buf),
       done++;
     }
   *fcvt_buf++ = 0;
+#ifdef USE_MALLOC_DTOA
+  _free_r (reent, start);
+#endif
   return save;
 }
 
@@ -376,21 +394,24 @@ _DEFUN (_gcvt, (ptr, invalue, ndigit, buf, type, dot),
       int decpt;
       int sign;
       char *end;
-      char *p;
+      char *p, *start;
 
       if (invalue < 1.0)
 	{
 	  /* what we want is ndigits after the point */
-	  p = _dtoa_r (ptr, invalue, 3, ndigit, &decpt, &sign, &end);
+	  start = p = _dtoa_r (ptr, invalue, 3, ndigit, &decpt, &sign, &end);
 	}
       else
 	{
-	  p = _dtoa_r (ptr, invalue, 2, ndigit, &decpt, &sign, &end);
+	  start = p = _dtoa_r (ptr, invalue, 2, ndigit, &decpt, &sign, &end);
 	}
 
       if (decpt == 9999)
 	{
 	  strcpy (buf, p);
+#ifdef USE_MALLOC_DTOA
+          _free_r (ptr, start);
+#endif
 	  return save;
 	}
       while (*p && decpt > 0)
@@ -436,6 +457,9 @@ _DEFUN (_gcvt, (ptr, invalue, ndigit, buf, type, dot),
 	    }
 	}
       *buf++ = 0;
+#ifdef USE_MALLOC_DTOA
+      _free_r (ptr, start);
+#endif
     }
 
   return save;
