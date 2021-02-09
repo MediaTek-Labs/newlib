@@ -11,6 +11,9 @@
 #ifdef __AMDGCN__
 #define __DYNAMIC_REENT__
 #endif
+#if defined(__nanomips__)
+#define USE_MALLOC_DTOA
+#endif
 
 /* exceptions first */
 #if defined(__H8500__) || defined(__W65__)
