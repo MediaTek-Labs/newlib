@@ -8,6 +8,10 @@
 #define MALLOC_ALIGNMENT 16
 #endif
 
+#if defined(__nanomips__)
+#define USE_MALLOC_DTOA
+#endif
+
 /* exceptions first */
 #if defined(__H8500__) || defined(__W65__)
 #define __SMALL_BITFIELDS
