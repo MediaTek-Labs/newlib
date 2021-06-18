@@ -2069,6 +2069,9 @@ cvt(struct _reent *data, _PRINTF_FLOAT_TYPE value, int ndigits, int flags,
 			}
 		}
 		*length = bp - buf;
+# ifdef USE_MALLOC_DTOA
+		buf = _strdup_r (data, buf);
+# endif
 		return buf;
 	}
 # endif /* _WANT_IO_C99_FORMATS */
