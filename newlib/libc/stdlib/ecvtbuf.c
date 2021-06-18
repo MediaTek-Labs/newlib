@@ -295,7 +295,7 @@ ecvtbuf (double invalue,
 {
   struct _reent *reent = _REENT;
   char *save;
-  char *p, start;
+  char *p, *start;
   char *end;
   int done = 0;
 
