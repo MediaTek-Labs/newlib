@@ -180,4 +180,8 @@ _END_STD_C
 #include <ssp/string.h>
 #endif
 
+#ifdef __nanomips__
+void *	 __aligned_memcpy_no_prefetch (void *__restrict, const void *__restrict, size_t);
+#endif
+
 #endif /* _STRING_H_ */
