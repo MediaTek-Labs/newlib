@@ -51,7 +51,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@NANOMIPS_TRUE@am__append_1 = strlen-c.c strcpy.c
+@NANOMIPS_TRUE@am__append_1 = strlen-c.c strcpy.c aligned_memcpy_no_prefetch.c
 @NANOMIPS_FALSE@am__append_2 = strlen.c
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
@@ -72,7 +72,8 @@ ARFLAGS = cru
 lib_a_AR = $(AR) $(ARFLAGS)
 lib_a_LIBADD =
 @NANOMIPS_TRUE@am__objects_1 = lib_a-strlen-c.$(OBJEXT) \
-@NANOMIPS_TRUE@	lib_a-strcpy.$(OBJEXT)
+@NANOMIPS_TRUE@	lib_a-strcpy.$(OBJEXT) \
+@NANOMIPS_TRUE@	lib_a-aligned_memcpy_no_prefetch.$(OBJEXT)
 @NANOMIPS_FALSE@am__objects_2 = lib_a-strlen.$(OBJEXT)
 am_lib_a_OBJECTS = lib_a-setjmp.$(OBJEXT) lib_a-strncpy.$(OBJEXT) \
 	lib_a-strcmp.$(OBJEXT) lib_a-memcpy.$(OBJEXT) \
@@ -133,7 +134,6 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
@@ -313,6 +313,12 @@ lib_a-strcpy.o: strcpy.c
 
 lib_a-strcpy.obj: strcpy.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-strcpy.obj `if test -f 'strcpy.c'; then $(CYGPATH_W) 'strcpy.c'; else $(CYGPATH_W) '$(srcdir)/strcpy.c'; fi`
+
+lib_a-aligned_memcpy_no_prefetch.o: aligned_memcpy_no_prefetch.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-aligned_memcpy_no_prefetch.o `test -f 'aligned_memcpy_no_prefetch.c' || echo '$(srcdir)/'`aligned_memcpy_no_prefetch.c
+
+lib_a-aligned_memcpy_no_prefetch.obj: aligned_memcpy_no_prefetch.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-aligned_memcpy_no_prefetch.obj `if test -f 'aligned_memcpy_no_prefetch.c'; then $(CYGPATH_W) 'aligned_memcpy_no_prefetch.c'; else $(CYGPATH_W) '$(srcdir)/aligned_memcpy_no_prefetch.c'; fi`
 
 lib_a-strlen.o: strlen.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_a_CFLAGS) $(CFLAGS) -c -o lib_a-strlen.o `test -f 'strlen.c' || echo '$(srcdir)/'`strlen.c

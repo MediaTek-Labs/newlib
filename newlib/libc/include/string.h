@@ -193,4 +193,8 @@ char	*_EXFUN(__nonnull (1) basename,(const char *)) __asm__(__ASMNAME("__gnu_bas
 
 _END_STD_C
 
+#ifdef __nanomips__
+_PTR 	 _EXFUN(__aligned_memcpy_no_prefetch,(_PTR __restrict, const _PTR __restrict, size_t));
+#endif
+
 #endif /* _STRING_H_ */

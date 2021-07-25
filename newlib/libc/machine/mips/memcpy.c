@@ -126,6 +126,31 @@
  #define ENABLE_PREFETCH_CHECK 0
 #endif
 
+/* Enable to compiled special case variant of memcpy.  */
+#ifndef ALIGNED_INPUTS
+ #define ALIGNED_INPUTS 0
+#endif
+
+#if ALIGNED_INPUTS
+ #undef HW_UNALIGNED_SUPPORT
+ #define HW_UNALIGNED_SUPPORT 1
+
+ #ifndef ALIGNED_INPUTS_CHECK
+  #define ALIGNED_INPUTS_CHECK 0
+ #else
+  #if ALIGNED_INPUTS_CHECK
+   #include <assert.h>
+  #endif /* ALIGNED_INPUTS_CHECK */
+ #endif /* ALIGNED_INPUTS_CHECK */
+#endif /* ALIGNED_INPUTS */
+
+/* Enable use of load-word-multiple and store-word-multiple
+   where available. Reduces code size but is usually not
+   the best for performance.  */
+#ifndef ENABLE_MULTI_LOADSTORE
+ #define ENABLE_MULTI_LOADSTORE 0
+#endif
+
 #if ENABLE_PREFETCH
  #if ENABLE_PREFETCH_CHECK
 #include <assert.h>
@@ -156,6 +181,20 @@ typedef struct
   reg_t B0:8, B1:8, B2:8, B3:8;
 } bits_t;
 #endif /* __mips64 */
+
+#if ENABLE_MULTI_LOADSTORE
+typedef struct
+{
+  reg_t W0;
+  reg_t W1;
+  reg_t W2;
+  reg_t W3;
+  reg_t W4;
+  reg_t W5;
+  reg_t W6;
+  reg_t W7;
+} reg8_t;
+#endif /* ENABLE_MULTI_LOADSTORE */
 
 #define CACHE_LINES_PER_BLOCK				\
   ((BLOCK_SIZE * sizeof (reg_t) > CACHE_LINE)		\
@@ -268,7 +307,11 @@ do_words_remaining (reg_t *a, const reg_t *b, unsigned long words,
 #endif /* BLOCK_SIZE == 16 */
 #endif
     }
+#if ALIGNED_INPUTS
+  return ret;
+#else
   return do_bytes_remaining (a + BLOCK_SIZE, b + BLOCK_SIZE, bytes, ret);
+#endif
 }
 
 #if !HW_UNALIGNED_SUPPORT
@@ -631,7 +674,11 @@ aligned_words (reg_t * a, const reg_t * b,
       if (words_by_block > PREF_AHEAD)
 	for (i = 0; i < CACHE_LINES_PER_BLOCK; i++)
 	  PREFETCH (b + ((BLOCK_SIZE / CACHE_LINES_PER_BLOCK) * (PREF_AHEAD + i)));
-
+#if ENABLE_MULTI_LOADSTORE
+      reg8_t *a8 = (reg8_t *) a;
+      reg8_t *b8 = (reg8_t *) b;
+      *a8 = *b8;
+#else /* ! MULTI_LOADSTORE */
       reg_t x0 = b[0], x1 = b[1], x2 = b[2], x3 = b[3];
       reg_t x4 = b[4], x5 = b[5], x6 = b[6], x7 = b[7];
       a[0] = x0;
@@ -642,7 +689,11 @@ aligned_words (reg_t * a, const reg_t * b,
       a[5] = x5;
       a[6] = x6;
       a[7] = x7;
+#endif /* ! MULTI_LOADSTORE */
 #if BLOCK_SIZE==16
+#if ENABLE_MULTI_LOADSTORE
+      a8[1] = b8[1];
+#else /* ! MULTI_LOADSTORE */
       x0 = b[8], x1 = b[9], x2 = b[10], x3 = b[11];
       x4 = b[12], x5 = b[13], x6 = b[14], x7 = b[15];
       a[8] = x0;
@@ -653,6 +704,7 @@ aligned_words (reg_t * a, const reg_t * b,
       a[13] = x5;
       a[14] = x6;
       a[15] = x7;
+#endif /* ! MULTI_LOADSTORE */
 #endif /* BLOCK_SIZE==16 */
       a += BLOCK_SIZE;
       b += BLOCK_SIZE;
@@ -662,8 +714,12 @@ aligned_words (reg_t * a, const reg_t * b,
   return do_words_remaining (a, b, words_by_1, bytes, ret);
 }
 
+#ifndef DEF_MEMCPY
+#define DEF_MEMCPY memcpy
+#endif
+
 void *
-memcpy (void *a, const void *b, size_t len) __overloadable
+DEF_MEMCPY (void *a, const void *b, size_t len) __overloadable
 {
   unsigned long bytes, words, i;
   void *ret = a;
@@ -671,8 +727,16 @@ memcpy (void *a, const void *b, size_t len) __overloadable
   limit = (char *)b + len;
 #endif /* ENABLE_PREFETCH_CHECK */
   /* shouldn't hit that often.  */
+#if ALIGNED_INPUTS
+ #if ALIGNED_INPUTS_CHECK
+  assert ((unsigned long)a % sizeof(reg_t) == 0
+	  && (unsigned long)b % sizeof(reg_t) == 0
+	  && (len % sizeof(reg_t)) == 0);
+ #endif /* ALIGNED_INPUTS_CHECKS */
+#else /* !ALIGNED_INPUTS */
   if (len <= 8)
     return do_bytes (a, b, len, a);
+#endif /* ALIGNED_INPUTS */
 
   /* Start pre-fetches ahead of time.  */
   if (len > CACHE_LINE * PREF_AHEAD_UA)
@@ -682,6 +746,9 @@ memcpy (void *a, const void *b, size_t len) __overloadable
     for (i = 1; i < len / CACHE_LINE; i++)
       PREFETCH ((char *)b + CACHE_LINE * i);
 
+#if ALIGNED_INPUTS
+  bytes = 0;
+#else
 #if HW_UNALIGNED_SUPPORT || !ISA_HAS_ALIGN
   /* Align the second pointer to word/dword alignment.
      Note that the pointer is only 32-bits for o32/n32 ABIs.  For
@@ -700,10 +767,13 @@ memcpy (void *a, const void *b, size_t len) __overloadable
       a = (void *) (((unsigned char *) a) + bytes);
       b = (const void *) (((unsigned char *) b) + bytes);
     }
+#endif
 
   /* At least one pointer now aligned.  */
   words = len / sizeof (reg_t);
+#if !ALIGNED_INPUTS
   bytes = len % sizeof (reg_t);
+#endif
 
 #if HW_UNALIGNED_SUPPORT
   /* treat possible unaligned first pointer as aligned.  */
