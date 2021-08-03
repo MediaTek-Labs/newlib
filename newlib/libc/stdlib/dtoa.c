@@ -435,7 +435,7 @@ _dtoa_r (struct _reent *ptr,
   _REENT_MP_RESULT(ptr) = eBalloc (ptr, _REENT_MP_RESULT_K(ptr));
   s = s0 = (char *) _REENT_MP_RESULT(ptr);
 #else
-  s = s0 = _malloc_r (ptr, i);
+  s = s0 = _malloc_r (ptr, i + 1 /* NULL terminator */);
 #endif
 
   if (ilim >= 0 && ilim <= Quick_max && try_quick)
