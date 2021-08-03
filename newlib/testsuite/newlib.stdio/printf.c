@@ -8,6 +8,8 @@ static size_t allocated = 0;
 
 #ifdef USE_MALLOC_DTOA
 
+#define GUARD_SIZE 16
+
 #define MAX(a,b)	((a) > (b) ? (a) : (b))
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 
@@ -16,17 +18,17 @@ extern void *_sbrk_r (struct _reent *, size_t);
 void *_malloc_r (struct _reent *r, size_t size)
 {
     if (!size)
-        return NULL;
+	return NULL;
 
-    size_t to_alloc = size + sizeof(size_t) + MALLOC_ALIGNMENT - 1;
+    size_t to_alloc = size + sizeof(size_t) + MALLOC_ALIGNMENT - 1 + GUARD_SIZE;
 
     if (to_alloc < size)
-        return NULL;
+	return NULL;
 
     void *p = _sbrk_r (r, to_alloc);
 
     if (p == (void *) -1)
-        return NULL;
+	return NULL;
 
     allocated += size;
 
@@ -36,6 +38,10 @@ void *_malloc_r (struct _reent *r, size_t size)
 
     ((size_t *)p)[-1] = size;
 
+    char *q = p + size;
+    for (int i = 0; i < GUARD_SIZE; i++)
+	q[i] = 0xff;
+
     return p;
 }
 
@@ -44,12 +50,12 @@ void *_calloc_r (struct _reent *r, size_t num, size_t size)
     size_t to_alloc = size * num;
 
     if (to_alloc < size || to_alloc < num)
-        return NULL;
+	return NULL;
 
     void *p = _malloc_r (r, to_alloc);
 
     if (p)
-        memset (p, 0x0, to_alloc);
+	memset (p, 0x0, to_alloc);
 
     return p;
 }
@@ -58,13 +64,24 @@ void _free_r (struct _reent *r, void *p)
 {
     if (p)
     {
-        size_t size = ((size_t *)p)[-1];
+	size_t size = ((size_t *)p)[-1];
 
-        if (size == -1)
-        {
-            printf (__FILE__ ":%d: double free of %p\n", __LINE__, p);
-            abort ();
-        }
+	if (size == -1)
+	{
+	    printf (__FILE__ ":%d: double free of %p\n", __LINE__, p);
+	    abort ();
+	}
+
+	char *q = p + size;
+	for (int i = 0; i < GUARD_SIZE; i++)
+	{
+	     if (q[i] != 0xff)
+	     {
+		printf (__FILE__ ":%d: overwrite of %p at %zu\n", __LINE__,
+			p, size + i);
+		abort ();
+	     }
+	}
 
         allocated -= size;
         memset (p, 0xdb, size);
@@ -75,7 +92,7 @@ void _free_r (struct _reent *r, void *p)
 void *_realloc_r (struct _reent *r, void *p, size_t new_size)
 {
     if (!p)
-        return _malloc_r (r, new_size);
+	return _malloc_r (r, new_size);
 
     size_t size = ((size_t *)p)[-1];
 
@@ -83,8 +100,8 @@ void *_realloc_r (struct _reent *r, void *p, size_t new_size)
 
     if (_new)
     {
-        memcpy (_new, p, MIN(size, new_size));
-        _free_r (r, p);
+	memcpy (_new, p, MIN(size, new_size));
+	_free_r (r, p);
     }
 
     return _new;
@@ -174,24 +191,24 @@ static const struct {
 
 int main (void)
 {
-	int i, j;
-	int err=0;
-	char b[2000], *s;
+    int i, j;
+    int err=0;
+    char b[2000], *s;
 
-	allocated = 0;
+    allocated = 0;
 
-	for (j=0; fp_tests[j].fmt; j++) {
-		TEST(i, snprintf (b, sizeof b, fp_tests[j].fmt, fp_tests[j].f), strlen (b), "%d != %d");
-		TEST_S(b, fp_tests[j].expect, "bad floating point conversion");
-	}
+    for (j=0; fp_tests[j].fmt; j++) {
+	TEST(i, snprintf (b, sizeof b, fp_tests[j].fmt, fp_tests[j].f), strlen (b), "%d != %d");
+	TEST_S(b, fp_tests[j].expect, "bad floating point conversion");
+    }
 
-	TEST(i, snprintf (0, 0, "%.4a", 1.0), 11, "%d != %d");
+    TEST(i, snprintf (0, 0, "%.4a", 1.0), 11, "%d != %d");
 
-	if (allocated != 0)
-	{
-	    printf (__FILE__ ":%d: allocated [%d] != 0\n", __LINE__, (int)allocated);
-	    err++;
-	}
+    if (allocated != 0)
+    {
+	printf (__FILE__ ":%d: allocated [%d] != 0\n", __LINE__, (int)allocated);
+	err++;
+    }
 
-	return err;
+    return err;
 }
