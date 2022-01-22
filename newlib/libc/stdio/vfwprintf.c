@@ -1626,12 +1626,12 @@ wcvt(struct _reent *data, _PRINTF_FLOAT_TYPE value, int ndigits, int flags,
 	}
 
 	{
-	  char *digits, *bp, *rve;
+	  char *digits, *bp, *rve, *malloc_buf;
 #ifndef _MB_CAPABLE
 	  int i;
 #endif
 
-	  digits = _DTOA_R (data, value, mode, ndigits, decpt, &dsgn, &rve);
+	  malloc_buf = digits = _DTOA_R (data, value, mode, ndigits, decpt, &dsgn, &rve);
 
 	  if ((ch != L'g' && ch != L'G') || flags & ALT) {	/* Print trailing zeros */
 		bp = digits + ndigits;
@@ -1655,7 +1655,9 @@ wcvt(struct _reent *data, _PRINTF_FLOAT_TYPE value, int ndigits, int flags,
 	    buf[i] = (wchar_t) digits[i];
 #endif
 #ifdef USE_MALLOC_DTOA
-	  _free_r (data, digits);
+	  _free_r (data, malloc_buf);
+#else
+	  ((void) malloc_buf);
 #endif
 	  return buf;
 	}
