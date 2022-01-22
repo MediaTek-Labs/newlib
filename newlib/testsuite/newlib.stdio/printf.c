@@ -4,6 +4,10 @@
 #include <math.h>
 #include <sys/reent.h>
 
+#ifdef _MB_CAPABLE
+#include <wchar.h>
+#endif
+
 static size_t allocated = 0;
 
 #ifdef USE_MALLOC_DTOA
@@ -118,82 +122,96 @@ void *_realloc_r (struct _reent *r, void *p, size_t new_size)
 !strcmp ((s),(x)) || \
 (printf (__FILE__ ":%d: [%s] != [%s] (%s)\n", __LINE__, s, x, m), err++, 0) )
 
+#ifdef _MB_CAPABLE
+
+#define TEST_W(s, x, m) ( \
+!wcscmp ((s),(x)) || \
+(printf (__FILE__ ":%d: [%ls] != [%ls] (%s)\n", __LINE__, s, x, m), err++, 0) )
+
+#define CASE(fmt, f, expect) { fmt, expect, L ## fmt, L ## expect, f }
+#else
+#define CASE(fmt, f, expect) { fmt, expect, f }
+#endif
 
 static const struct {
 	const char *fmt;
-	double f;
 	const char *expect;
+#ifdef _MB_CAPABLE
+	const wchar_t *wfmt;
+	const wchar_t *wexpect;
+#endif
+	double f;
 } fp_tests[] = {
 	/* basic form, handling of exponent/precision for 0 */
-	{ "%e", 0.0, "0.000000e+00" },
-	{ "%f", 0.0, "0.000000" },
-	{ "%g", 0.0, "0" },
-	{ "%#g", 0.0, "0.00000" },
+	CASE( "%e", 0.0, "0.000000e+00" ),
+	CASE( "%f", 0.0, "0.000000" ),
+	CASE( "%g", 0.0, "0" ),
+	CASE( "%#g", 0.0, "0.00000" ),
 #if defined(_WANT_IO_C99_FORMATS)
-	{ "%a", 0.0, "0x0p+0" },
-	{ "%A", 0.0, "0X0P+0" },
-	{ "%.0a", 0.0, "0x0p+0" },
-	{ "%.0A", 0.0, "0X0P+0" },
+	CASE( "%a", 0.0, "0x0p+0" ),
+	CASE( "%A", 0.0, "0X0P+0" ),
+	CASE( "%.0a", 0.0, "0x0p+0" ),
+	CASE( "%.0A", 0.0, "0X0P+0" ),
 #endif
 
 	/* rounding */
-	{ "%f", 1.1, "1.100000" },
-	{ "%f", 1.2, "1.200000" },
-	{ "%f", 1.3, "1.300000" },
-	{ "%f", 1.4, "1.400000" },
-	{ "%f", 1.5, "1.500000" },
-	{ "%.4f", 1.06125, "1.0613" },
-	{ "%.2f", 1.375, "1.38" },
-	{ "%.1f", 1.375, "1.4" },
-	{ "%.15f", 1.1, "1.100000000000000" },
-	{ "%.16f", 1.1, "1.1000000000000001" },
-	{ "%.17f", 1.1, "1.10000000000000009" },
-	{ "%.2e", 1500001.0, "1.50e+06" },
-	{ "%.2e", 1505000.0, "1.50e+06" },
-	{ "%.2e", 1505000.00000095367431640625, "1.51e+06" },
-	{ "%.2e", 1505001.0, "1.51e+06" },
-	{ "%.2e", 1506000.0, "1.51e+06" },
+	CASE( "%f", 1.1, "1.100000" ),
+	CASE( "%f", 1.2, "1.200000" ),
+	CASE( "%f", 1.3, "1.300000" ),
+	CASE( "%f", 1.4, "1.400000" ),
+	CASE( "%f", 1.5, "1.500000" ),
+	CASE( "%.4f", 1.06125, "1.0613" ),
+	CASE( "%.2f", 1.375, "1.38" ),
+	CASE( "%.1f", 1.375, "1.4" ),
+	CASE( "%.15f", 1.1, "1.100000000000000" ),
+	CASE( "%.16f", 1.1, "1.1000000000000001" ),
+	CASE( "%.17f", 1.1, "1.10000000000000009" ),
+	CASE( "%.2e", 1500001.0, "1.50e+06" ),
+	CASE( "%.2e", 1505000.0, "1.50e+06" ),
+	CASE( "%.2e", 1505000.00000095367431640625, "1.51e+06" ),
+	CASE( "%.2e", 1505001.0, "1.51e+06" ),
+	CASE( "%.2e", 1506000.0, "1.51e+06" ),
 
 	/* correctness in DBL_DIG places */
-	{ "%.15g", 1.23456789012345, "1.23456789012345" },
+	CASE( "%.15g", 1.23456789012345, "1.23456789012345" ),
 
 	/* correct choice of notation for %g */
-	{ "%g", 0.0001, "0.0001" },
-	{ "%g", 0.00001, "1e-05" },
-	{ "%g", 123456, "123456" },
-	{ "%g", 1234567, "1.23457e+06" },
-	{ "%.7g", 1234567, "1234567" },
-	{ "%.7g", 12345678, "1.234568e+07" },
-	{ "%.8g", 0.1, "0.1" },
-	{ "%.9g", 0.1, "0.1" },
-	{ "%.10g", 0.1, "0.1" },
-	{ "%.11g", 0.1, "0.1" },
+	CASE( "%g", 0.0001, "0.0001" ),
+	CASE( "%g", 0.00001, "1e-05" ),
+	CASE( "%g", 123456, "123456" ),
+	CASE( "%g", 1234567, "1.23457e+06" ),
+	CASE( "%.7g", 1234567, "1234567" ),
+	CASE( "%.7g", 12345678, "1.234568e+07" ),
+	CASE( "%.8g", 0.1, "0.1" ),
+	CASE( "%.9g", 0.1, "0.1" ),
+	CASE( "%.10g", 0.1, "0.1" ),
+	CASE( "%.11g", 0.1, "0.1" ),
 
 #if defined(_WANT_IO_C99_FORMATS)
-	{ "%a", 1.0, "0x1p+0" },
-	{ "%A", 1.0, "0X1P+0" },
-	{ "%a", 1.1, "0x1.199999999999ap+0" },
-	{ "%A", 1.1, "0X1.199999999999AP+0" },
-	{ "%.1a", 1.1, "0x1.2p+0" },
-	{ "%.1A", 1.1, "0X1.2P+0" },
+	CASE( "%a", 1.0, "0x1p+0" ),
+	CASE( "%A", 1.0, "0X1P+0" ),
+	CASE( "%a", 1.1, "0x1.199999999999ap+0" ),
+	CASE( "%A", 1.1, "0X1.199999999999AP+0" ),
+	CASE( "%.1a", 1.1, "0x1.2p+0" ),
+	CASE( "%.1A", 1.1, "0X1.2P+0" ),
 #endif
 
 	/* pi in double precision, printed to a few extra places */
-	{ "%.15f", M_PI, "3.141592653589793" },
-	{ "%.18f", M_PI, "3.141592653589793116" },
+	CASE( "%.15f", M_PI, "3.141592653589793" ),
+	CASE( "%.18f", M_PI, "3.141592653589793116" ),
 
 	/* exact conversion of large integers */
-	{ "%.0f", 340282366920938463463374607431768211456.0,
-	         "340282366920938463463374607431768211456" },
+	CASE( "%.0f", 340282366920938463463374607431768211456.0,
+	         "340282366920938463463374607431768211456" ),
 
-	{ NULL, 0.0, NULL }
+	{ NULL }
 };
 
 int main (void)
 {
     int i, j;
     int err=0;
-    char b[2000], *s;
+    char b[2000];
 
     allocated = 0;
 
@@ -203,6 +221,15 @@ int main (void)
     }
 
     TEST(i, snprintf (0, 0, "%.4a", 1.0), 11, "%d != %d");
+
+#ifdef _MB_CAPABLE
+    wchar_t wb[sizeof b];
+
+    for (j=0; fp_tests[j].fmt; j++) {
+	TEST(i, swprintf (wb, sizeof b, fp_tests[j].wfmt, fp_tests[j].f), wcslen (wb), "%d != %d");
+	TEST_W(wb, fp_tests[j].wexpect, "bad floating point conversion");
+    }
+#endif
 
     if (allocated != 0)
     {
