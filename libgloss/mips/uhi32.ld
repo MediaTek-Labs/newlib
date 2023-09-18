@@ -304,7 +304,7 @@ SECTIONS
     *(COMMON)
   }
 
-  . = ALIGN(4);
+  . = ALIGN(16) + 8;
   PROVIDE (end = .);
   _end = .;
   /* Now place the data that is only needed within start.S and can be

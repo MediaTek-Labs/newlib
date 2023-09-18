@@ -173,7 +173,7 @@ SECTIONS
     *(COMMON)
   }
 
-  . = ALIGN(4);
+  . = ALIGN(16) + 8;
   PROVIDE (end = .);
   _end = .;
 
