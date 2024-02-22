@@ -77,6 +77,8 @@
 
 #ifdef __nanomips__
 # define _FUNCTION_SECTIONS_
+	.linkrelax
+	.module pcrel
 #endif
 
 #ifdef ANDROID_CHANGES

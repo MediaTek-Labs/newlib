@@ -133,6 +133,11 @@
 #define GPOFF(INDEX) (INDEX * BYTES_PER_WORD)
 #define FPOFF(INDEX) ((INDEX + NUM_GPRS_SAVED) * BYTES_PER_WORD)
 
+#ifdef __nanomips__
+	.linkrelax
+	.module pcrel
+#endif
+
 /* int setjmp (jmp_buf);  */
 	.globl	setjmp
 	.ent	setjmp
