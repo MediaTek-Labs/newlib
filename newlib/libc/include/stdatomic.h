@@ -270,26 +270,26 @@ typedef _Atomic(uintmax_t)		atomic_uintmax_t;
 #elif defined(__GNUC11_ATOMICS)
 #define	atomic_compare_exchange_strong_explicit(object, expected,	\
     desired, success, failure)						\
-	__atomic_compare_exchange_n(&(object)->__val, expected,		\
+	__atomic_compare_exchange_n(object, expected,		\
 	    desired, 0, success, failure)
 #define	atomic_compare_exchange_weak_explicit(object, expected,		\
     desired, success, failure)						\
-	__atomic_compare_exchange_n(&(object)->__val, expected,		\
+	__atomic_compare_exchange_n(object, expected,		\
 	    desired, 1, success, failure)
 #define	atomic_exchange_explicit(object, desired, order)		\
-	__atomic_exchange_n(&(object)->__val, desired, order)
+	__atomic_exchange_n(object, desired, order)
 #define	atomic_fetch_add_explicit(object, operand, order)		\
-	__atomic_fetch_add(&(object)->__val, operand, order)
+	__atomic_fetch_add(object, operand, order)
 #define	atomic_fetch_and_explicit(object, operand, order)		\
-	__atomic_fetch_and(&(object)->__val, operand, order)
+	__atomic_fetch_and(object, operand, order)
 #define	atomic_fetch_or_explicit(object, operand, order)		\
-	__atomic_fetch_or(&(object)->__val, operand, order)
+	__atomic_fetch_or(object, operand, order)
 #define	atomic_fetch_sub_explicit(object, operand, order)		\
-	__atomic_fetch_sub(&(object)->__val, operand, order)
+	__atomic_fetch_sub(object, operand, order)
 #define	atomic_fetch_xor_explicit(object, operand, order)		\
-	__atomic_fetch_xor(&(object)->__val, operand, order)
+	__atomic_fetch_xor(object, operand, order)
 #define	atomic_load_explicit(object, order)				\
-	__atomic_load_n(&(object)->__val, order)
+	__atomic_load_n(object, order)
 #define	atomic_store_explicit(object, desired, order)			\
 	__atomic_store_n(object, desired, order)
 #elif defined(__GNUC_ATOMICS)
