@@ -6,7 +6,7 @@ INCLUDES = -I $(newlib_basedir)/../newlib/libm/common $(NEWLIB_CFLAGS) \
 LIB_SOURCES = \
 	feclearexcept.c fegetenv.c fegetexceptflag.c \
 	fegetround.c feholdexcept.c feraiseexcept.c fesetenv.c \
-	fesetexceptflag.c fesetround.c fetestexcept.c feupdateenv.c
+	fesetexceptflag.c fesetround.c fetestexcept.c feupdateenv.c fenv.c
 
 noinst_LIBRARIES = lib.a
 lib_a_SOURCES = $(LIB_SOURCES)
@@ -19,12 +19,18 @@ include $(srcdir)/../../../Makefile.shared
 LIBADD_OBJS = \
 	lib_a-fenv.$(OBJEXT)
 
-# fenv.c cannot be compiled as mips16 since it uses the cfc1 instruction
+ifeq ($(host_cpu),nanomips)
+        ADDITIONAL_FLAGS =
+else
+        # fenv.c cannot be compiled as mips16 since it uses the cfc1 instruction
+        ADDITIONAL_FLAGS = -mno-mips16
+endif
+
 lib_a-fenv.o: fenv.c
-	$(COMPILE) -mno-mips16 -c -o $@ `test -f 'fenv.c' || echo '$(srcdir)/'`fenv.c
+       $(COMPILE) $(ADDITIONAL_FLAGS) -c -o $@ `test -f 'fenv.c' || echo '$(srcdir)/'`fenv.c
 
 lib_a-fenv.obj: fenv.c
-	$(COMPILE) -mno-mips16 -c -o $@ `if test -f 'fenv.c'; then $(CYGPATH_W) 'fenv.c'; else $(CYGPATH_W) '$(srcdir)/fenv.c'; fi`
+       $(COMPILE) $(ADDITIONAL_FLAGS) -c -o $@ `if test -f 'fenv.c'; then $(CYGPATH_W) 'fenv.c'; else $(CYGPATH_W) '$(srcdir)/fenv.c'; fi`
 
 ACLOCAL_AMFLAGS = -I ../../.. -I ../../../..
 CONFIG_STATUS_DEPENDENCIES = $(newlib_basedir)/configure.host

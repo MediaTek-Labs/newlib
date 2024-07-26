@@ -81,7 +81,7 @@ am__objects_1 = lib_a-feclearexcept.$(OBJEXT) lib_a-fegetenv.$(OBJEXT) \
 	lib_a-feholdexcept.$(OBJEXT) lib_a-feraiseexcept.$(OBJEXT) \
 	lib_a-fesetenv.$(OBJEXT) lib_a-fesetexceptflag.$(OBJEXT) \
 	lib_a-fesetround.$(OBJEXT) lib_a-fetestexcept.$(OBJEXT) \
-	lib_a-feupdateenv.$(OBJEXT)
+	lib_a-feupdateenv.$(OBJEXT) lib_a-fenv.$(OBJEXT)
 am_lib_a_OBJECTS = $(am__objects_1)
 lib_a_OBJECTS = $(am_lib_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -223,7 +223,7 @@ INCLUDES = -I $(newlib_basedir)/../newlib/libm/common $(NEWLIB_CFLAGS) \
 LIB_SOURCES = \
 	feclearexcept.c fegetenv.c fegetexceptflag.c \
 	fegetround.c feholdexcept.c feraiseexcept.c fesetenv.c \
-	fesetexceptflag.c fesetround.c fetestexcept.c feupdateenv.c
+	fesetexceptflag.c fesetround.c fetestexcept.c feupdateenv.c fenv.c
 
 noinst_LIBRARIES = lib.a
 lib_a_SOURCES = $(LIB_SOURCES)
@@ -570,12 +570,19 @@ docbook: $(DOCBOOK_OUT_FILES)
 	  ${top_srcdir}/../doc/chapter-texi2docbook.py <$(srcdir)/$${chapter%.xml}.tex >../$$chapter ; \
 	done
 
-# fenv.c cannot be compiled as mips16 since it uses the cfc1 instruction
+ifeq ($(host_cpu),nanomips)
+	ADDITIONAL_FLAGS =
+else
+	# fenv.c cannot be compiled as mips16 since it uses the cfc1 instruction
+	ADDITIONAL_FLAGS = -mno-mips16
+endif
+
 lib_a-fenv.o: fenv.c
-	$(COMPILE) -mno-mips16 -c -o $@ `test -f 'fenv.c' || echo '$(srcdir)/'`fenv.c
+	$(COMPILE) $(ADDITIONAL_FLAGS) -c -o $@ `test -f 'fenv.c' || echo '$(srcdir)/'`fenv.c
 
 lib_a-fenv.obj: fenv.c
-	$(COMPILE) -mno-mips16 -c -o $@ `if test -f 'fenv.c'; then $(CYGPATH_W) 'fenv.c'; else $(CYGPATH_W) '$(srcdir)/fenv.c'; fi`
+	$(COMPILE) $(ADDITIONAL_FLAGS) -c -o $@ `if test -f 'fenv.c'; then $(CYGPATH_W) 'fenv.c'; else $(CYGPATH_W) '$(srcdir)/fenv.c'; fi`
+
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
