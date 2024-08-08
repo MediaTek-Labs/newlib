@@ -97,7 +97,6 @@ fstat (int file, struct stat *sbuf)
   __check (__LINE__, offsetof (struct stat, st_blocks) == 80);
   __check (__LINE__, offsetof (struct stat, st_spare4) == 88);
 #else
-  __check (__LINE__, sizeof (struct stat) == 60);
   __check (__LINE__, offsetof (struct stat, st_dev) == 0);
   __check (__LINE__, offsetof (struct stat, st_ino) == 2);
   __check (__LINE__, offsetof (struct stat, st_mode) == 4);
@@ -105,16 +104,42 @@ fstat (int file, struct stat *sbuf)
   __check (__LINE__, offsetof (struct stat, st_uid) == 10);
   __check (__LINE__, offsetof (struct stat, st_gid) == 12);
   __check (__LINE__, offsetof (struct stat, st_rdev) == 14);
-  __check (__LINE__, offsetof (struct stat, st_size) == 16);
+#ifdef _USE_LONG_TIME_T
+  __check (__LINE__, sizeof (struct stat) == 60);
+#if defined(__rtems__)
+  __check (__LINE__, offsetof (struct stat, st_atim) == 20);
+  //  __check (__LINE__, offsetof (struct stat, st_spare1) == 24);
+  __check (__LINE__, offsetof (struct stat, st_mtim) == 28);
+  //__check (__LINE__, offsetof (struct stat, st_spare2) == 32);
+  __check (__LINE__, offsetof (struct stat, st_ctim) == 36);
+  //__check (__LINE__, offsetof (struct stat, st_spare3) == 40);
+#else
   __check (__LINE__, offsetof (struct stat, st_atime) == 20);
-  __check (__LINE__, offsetof (struct stat, st_spare1) == 24);
   __check (__LINE__, offsetof (struct stat, st_mtime) == 28);
-  __check (__LINE__, offsetof (struct stat, st_spare2) == 32);
   __check (__LINE__, offsetof (struct stat, st_ctime) == 36);
-  __check (__LINE__, offsetof (struct stat, st_spare3) == 40);
+#endif
   __check (__LINE__, offsetof (struct stat, st_blksize) == 44);
   __check (__LINE__, offsetof (struct stat, st_blocks) == 48);
   __check (__LINE__, offsetof (struct stat, st_spare4) == 52);
+#else // Using 64-bit time_t
+  __check (__LINE__, sizeof (struct stat) == 88);
+  __check (__LINE__, offsetof (struct stat, st_size) == 16);
+#if defined(__rtems__)
+  __check (__LINE__, offsetof (struct stat, st_atim) == 24);
+  //  __check (__LINE__, offsetof (struct stat, st_spare1) == 32);
+  __check (__LINE__, offsetof (struct stat, st_mtim) == 40);
+  //__check (__LINE__, offsetof (struct stat, st_spare2) == 48);
+  __check (__LINE__, offsetof (struct stat, st_ctim) == 56);
+  //__check (__LINE__, offsetof (struct stat, st_spare3) == 64);
+  __check (__LINE__, offsetof (struct stat, st_blksize) == 72);
+  __check (__LINE__, offsetof (struct stat, st_blocks) == 76);
+  __check (__LINE__, offsetof (struct stat, st_spare4) == 80);
+#else
+  __check (__LINE__, offsetof (struct stat, st_atime) == 24);
+  __check (__LINE__, offsetof (struct stat, st_mtime) == 40);
+  __check (__LINE__, offsetof (struct stat, st_ctime) == 56);
+#endif
+#endif
 #endif
 
   __asm__ __volatile__ (" # %0,%1 = fstat(%2, %3) op=%4\n"
