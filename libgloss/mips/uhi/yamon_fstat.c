@@ -98,7 +98,6 @@ fstat (int file, struct stat *sbuf)
   __check (__LINE__, offsetof (struct stat, st_blocks) == 80);
   __check (__LINE__, offsetof (struct stat, st_spare4) == 88);
 #else
-  __check (__LINE__, sizeof (struct stat) == 60);
   __check (__LINE__, offsetof (struct stat, st_dev) == 0);
   __check (__LINE__, offsetof (struct stat, st_ino) == 2);
   __check (__LINE__, offsetof (struct stat, st_mode) == 4);
@@ -106,9 +105,10 @@ fstat (int file, struct stat *sbuf)
   __check (__LINE__, offsetof (struct stat, st_uid) == 10);
   __check (__LINE__, offsetof (struct stat, st_gid) == 12);
   __check (__LINE__, offsetof (struct stat, st_rdev) == 14);
-  __check (__LINE__, offsetof (struct stat, st_size) == 16);
+#ifdef _USE_LONG_TIME_T
+  __check (__LINE__, sizeof (struct stat) == 60);
   __check (__LINE__, offsetof (struct stat, st_atim) == 20);
-  //__check (__LINE__, offsetof (struct stat, st_spare1) == 24);
+  //  __check (__LINE__, offsetof (struct stat, st_spare1) == 24);
   __check (__LINE__, offsetof (struct stat, st_mtim) == 28);
   //__check (__LINE__, offsetof (struct stat, st_spare2) == 32);
   __check (__LINE__, offsetof (struct stat, st_ctim) == 36);
@@ -116,6 +116,19 @@ fstat (int file, struct stat *sbuf)
   __check (__LINE__, offsetof (struct stat, st_blksize) == 44);
   __check (__LINE__, offsetof (struct stat, st_blocks) == 48);
   __check (__LINE__, offsetof (struct stat, st_spare4) == 52);
+#else // Using 64-bit time_t
+  __check (__LINE__, sizeof (struct stat) == 88);
+  __check (__LINE__, offsetof (struct stat, st_size) == 16);
+  __check (__LINE__, offsetof (struct stat, st_atim) == 24);
+  //  __check (__LINE__, offsetof (struct stat, st_spare1) == 32);
+  __check (__LINE__, offsetof (struct stat, st_mtim) == 40);
+  //__check (__LINE__, offsetof (struct stat, st_spare2) == 48);
+  __check (__LINE__, offsetof (struct stat, st_ctim) == 56);
+  //__check (__LINE__, offsetof (struct stat, st_spare3) == 64);
+  __check (__LINE__, offsetof (struct stat, st_blksize) == 72);
+  __check (__LINE__, offsetof (struct stat, st_blocks) == 76);
+  __check (__LINE__, offsetof (struct stat, st_spare4) == 80);
+#endif
 #endif
 
   if (file == 0 || file == 1 || file == 2)

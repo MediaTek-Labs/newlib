@@ -290,6 +290,9 @@
 #endif
 #endif
 
+#if defined(__nanomips_64bit_time_t__)
+#undef _WANT_USE_LONG_TIME_T
+#endif
 #ifdef _WANT_USE_LONG_TIME_T
 #ifndef _USE_LONG_TIME_T
 #define _USE_LONG_TIME_T
