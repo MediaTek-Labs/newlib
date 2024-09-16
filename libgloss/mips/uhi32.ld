@@ -7,7 +7,7 @@
 __entry = DEFINED(__reset_vector) ? 0xbfc00000 : _start;
 ENTRY(__entry)
 OUTPUT_FORMAT("elf32-tradlittlemips", "elf32-tradbigmips", "elf32-tradlittlemips")
-GROUP(-lc -luhi -lgcc -lhal)
+GROUP(-lc -luhi -lhal)
 SEARCH_DIR(.)
 __DYNAMIC  =  0;
 STARTUP(crt0.o)
@@ -183,11 +183,15 @@ SECTIONS
   .eh_frame_hdr : { *(.eh_frame_hdr) *(.eh_frame_entry .eh_frame_entry.*) }
   .eh_frame :
   {
+    __eh_frame_start = .;
     /* The .eh_frame section from the crtend file contains the
        end of eh_frame marker and it must be last.  */
     KEEP (*(EXCLUDE_FILE (*crtend.o) .eh_frame))
     KEEP (*(.eh_frame))
+    __eh_frame_end = .;
   }
+  __eh_frame_hdr_start = SIZEOF(.eh_frame_hdr) > 0 ? ADDR(.eh_frame_hdr) : 0;
+  __eh_frame_hdr_end = SIZEOF(.eh_frame_hdr) > 0 ? . : 0;
 
   .gcc_except_table : { *(.gcc_except_table .gcc_except_table.*) }
   .gnu_extab : { *(.gnu_extab .gnu_extab.*) }
