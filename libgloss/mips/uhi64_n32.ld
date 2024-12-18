@@ -15,12 +15,6 @@ STARTUP(crt0.o)
 EXTERN(__register_excpt_handler)
 /* Force the exception handler to be included in the link */
 EXTERN(__exception_entry)
-/*
- * Require verbose exceptions. This can be changed to pull in
- * __exception_handle_quiet to reduce code size but be less
- * informative
- */
-EXTERN(__exception_handle_verbose)
 /* Force ISRs 0-7 to be included in the link */
 EXTERN(__isr_vec_007)
 /* Require the UHI getargs support */
@@ -76,11 +70,17 @@ ASSERT (DEFINED(__register_excpt_boot) || __use_excpt_boot == 0,
 PROVIDE (__flush_to_zero = 1);
 
 /* Set up the public symbols depending on whether the user has chosen
-   quiet or verbose exception handling above */
+   quiet or verbose exception handling below */
 EXTERN (__exception_handle);
-PROVIDE(__exception_handle = (DEFINED(__exception_handle_quiet)
-				      ? __exception_handle_quiet
-				      : __exception_handle_verbose));
+/*
+ * Require verbose exceptions. This can be changed to pull in
+ * __exception_handle_quiet to reduce code size but be less
+ * informative
+ */
+EXTERN(__exception_handle_verbose)
+/* Change __exception_handle_verbose to __exception handle_quiet here
+   as well, if quiet exception handling is desired. */
+PROVIDE(__exception_handle = __exception_handle_verbose);
 PROVIDE(_mips_handle_exception = __exception_handle);
 
 /*
