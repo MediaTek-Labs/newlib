@@ -238,6 +238,42 @@ SECTIONS
     KEEP (*(.dtors))
   }
 
+  . = ALIGN(8);
+  PROVIDE(__llvm_prf_start = .);
+  __llvm_prf_header : AT(__llvm_prf_start) {
+    *(__llvm_prf_header)
+  }
+  __llvm_prf_data : AT(ADDR(__llvm_prf_header) + SIZEOF(__llvm_prf_header)) {
+    PROVIDE(__llvm_prf_data_start = .);
+    *(__llvm_prf_data)
+    PROVIDE(__llvm_prf_data_end = .);
+  }
+  __llvm_prf_cnts  : AT(ADDR(__llvm_prf_data) + SIZEOF(__llvm_prf_data)) {
+    PROVIDE(__llvm_prf_cnts_start = .);
+    *(__llvm_prf_cnts)
+    PROVIDE(__llvm_prf_cnts_end = .);
+  } 
+  __llvm_prf_names : AT(ADDR(__llvm_prf_cnts) + SIZEOF(__llvm_prf_cnts)) {
+    PROVIDE(__llvm_prf_names_start = .);
+    *(__llvm_prf_names)
+    . = ALIGN(8);
+    PROVIDE(__llvm_prf_names_end = .);
+  }
+  __llvm_prf_vals : AT(ADDR(__llvm_prf_names) + SIZEOF(__llvm_prf_names)) {
+    PROVIDE(__llvm_prf_vals_start = .);
+    *(__llvm_prf_vals)
+    PROVIDE(__llvm_prf_vals_end = .);
+  }
+  . = ALIGN(8);
+  PROVIDE(__llvm_prf_end = .);
+  __llvm_prf_vnds : {
+    PROVIDE(__llvm_prf_vnds_start = .);
+    *(__llvm_prf_vnds)
+    PROVIDE(__llvm_prf_vnds_end = .);
+  }
+  __llvm_covmap : { *(__llvm_covmap) }
+  __llvm_covfun : { *(__llvm_covfun) }
+
   . = .;
   .nanoMIPS.abiflags : {
     __nanoMIPS_abiflags_start = .;
