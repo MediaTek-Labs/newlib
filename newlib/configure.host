@@ -824,9 +824,14 @@ newlib_cflags="${newlib_cflags} -DCLOCK_PROVIDED -DMALLOC_PROVIDED -DEXIT_PROVID
 	default_newlib_io_long_long="yes"
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
 	;;
-  mips*-*-elf* | nanomips*-*-elf*)
+  mips*-*-elf*)
 	default_newlib_io_long_long="yes"
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
+	;;
+  nanomips*-*-elf*)
+	default_newlib_io_long_long="yes"
+	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
+	have_init_fini="no"
 	;;
   mmix-*)
 	syscall_dir=syscalls

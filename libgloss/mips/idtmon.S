@@ -30,7 +30,7 @@
 	.ent	name;				\
 name:	lui	$2,%hi(0xbfc00000+((index)*8));	\
 	addiu	$2,$2,%lo(0xbfc00000+((index)*8));	\
-	j	$2;				\
+	jrc	$2;				\
 	.end name
 
 /* The following magic numbers are for the slots into the IDT monitor: */

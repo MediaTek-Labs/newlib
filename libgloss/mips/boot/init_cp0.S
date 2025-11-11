@@ -52,37 +52,37 @@ LEAF(__init_cp0)
 	mtc0	t1, C0_WATCHHI
 	mfc0	t0, C0_WATCHHI
 	mtc0	zero, C0_WATCHLO
-	bgez	t0, $Ldone_wr
+	BGE_Z	(t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 1
 	mfc0	t0, C0_WATCHHI, 1
 	mtc0	zero, C0_WATCHLO, 1
-	bgez	t0, $Ldone_wr
+	BGE_Z (t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 2
 	mfc0	t0, C0_WATCHHI, 2
 	mtc0	zero, C0_WATCHLO, 2
-	bgez	t0, $Ldone_wr
+	BGE_Z (t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 3
 	mfc0	t0, C0_WATCHHI, 3
 	mtc0	zero, C0_WATCHLO, 3
-	bgez	t0, $Ldone_wr
+	BGE_Z (t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 4
 	mfc0	t0, C0_WATCHHI, 4
 	mtc0	zero, C0_WATCHLO, 4
-	bgez	t0, $Ldone_wr
+	BGE_Z (t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 5
 	mfc0	t0, C0_WATCHHI, 5
 	mtc0	zero, C0_WATCHLO, 5
-	bgez	t0, $Ldone_wr
+	BGE_Z (t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 6
 	mfc0	t0, C0_WATCHHI, 6
 	mtc0	zero, C0_WATCHLO, 6
-	bgez	t0, $Ldone_wr
+	BGE_Z (t0, $Ldone_wr)
 
 	mtc0	t1, C0_WATCHHI, 7
 	mfc0	t0, C0_WATCHHI, 7

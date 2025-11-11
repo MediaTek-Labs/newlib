@@ -189,6 +189,7 @@ __exception_handle_quiet (struct gpctx *ctx, int exception)
       WRITE ("MSA Floating point error\n");
       break;
     case EXC_FPE:
+#ifndef __mips_soft_float
       /* Turn on flush to zero the first time we hit an unimplemented
 	 operation.  If we hit it again then stop.  */
       if (__flush_to_zero
@@ -203,6 +204,7 @@ __exception_handle_quiet (struct gpctx *ctx, int exception)
 	  return;
 	}
       WRITE ("Floating point error\n");
+#endif
       break;
     case EXC_IS1:
       WRITE ("Implementation specific exception (16)\n");

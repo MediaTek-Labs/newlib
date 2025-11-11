@@ -74,7 +74,7 @@ DEF:
 	lui32	k1, %hi(ISR)
 	ori32	k1, k1, %lo(ISR)
 # else
-	li48	k1, ISR
+	li[48]	k1, ISR
 # endif
 #endif
 	beqz	k1, __isr_vec_fallback

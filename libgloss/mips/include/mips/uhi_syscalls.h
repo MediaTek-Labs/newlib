@@ -62,8 +62,12 @@
 	#define ASM_SYSCALL(NUM) sdbbp NUM
 #else
 #if defined(__nanomips__)
-	#define SYSCALL(NUM) "\tsyscall32 " __xstr (NUM)
+	#define SYSCALL(NUM) "\tsyscall[32] " __xstr (NUM)
+#if !defined(__clang__)
 	#define ASM_SYSCALL(NUM) syscall32 NUM
+#else
+	#define ASM_SYSCALL(NUM) syscall[32] NUM
+#endif
 #else
 	#define SYSCALL(NUM) "\tsyscall " __xstr (NUM)
 	#define ASM_SYSCALL(NUM) syscall NUM

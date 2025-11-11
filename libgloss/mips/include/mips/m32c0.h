@@ -1466,10 +1466,16 @@ __extension__ ({ \
 })
 
 /* Set upper half of EntryHI */
+#if !defined(__nanomips__) /* XPA not supported for nanoMIPS */
+#define _SET_XPA     "\t .set  xpa \n"
+#else
+#define _SET_XPA ""
+#endif
+
 #define mips32_sethientryhi(VAL)	\
 ({__asm__ volatile (		\
     "\t .set  push \n"		\
-    "\t .set  xpa \n"		\
+    _SET_XPA	                \
     "\t mthc0 %0,$10,0 \n"	\
     "\t .set  pop \n"		\
     : :"r" (VAL)		\

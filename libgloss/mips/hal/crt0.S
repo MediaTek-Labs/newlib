@@ -16,7 +16,9 @@
  */
 
 /* This file does not use any floating-point ABI.  */
+#ifndef __nanomips__
 	.gnu_attribute 4,0
+#endif
 
 #include "newlib.h"
 #include <mips/regdef.h>
@@ -120,7 +122,7 @@ _start:
 
 	/* Check isa_level.  */
 	lbu	t1,ABIFlags_isa_level(t0)
-	sltu	t2,t1,3			/* Is MIPS < 3?  */
+	SLTU_IMM t2,t1,3		/* Is MIPS < 3?  */
 	xori	t1,t1,64		/* Is MIPS64?  */
 	beq	t2,zero,3f
 	li	t2,SR_PE
@@ -180,7 +182,7 @@ _start:
 	aluipc	gp,%pcrel_hi(_gp)
 	ori	gp,gp,%lo(_gp)
 #else
-	lapc48	gp,_gp
+	lapc.b	gp,_gp
 #endif
 	.end _start
 
@@ -209,7 +211,7 @@ zerobss:
 						/* run some C code */
 	li	a0,0				/* no need for the ram base */
 	LA	a1, __ram_extent		/* storage for the extent of ram */
-	jal	_get_ram_range
+	CALL	_get_ram_range
 
 	/* NOTE: a0[0] contains the last address+1 of memory. */
 	LA	a0, __ram_extent
@@ -255,10 +257,10 @@ init:
 1:
 	/* Register exit handlers */
 	LA	a0, _fini
-	jal	atexit
+	CALL	atexit
 
 	/* run global constructors */
-	jal	_init
+	CALL	_init
 
 	/* Restore argument registers */
 	LA	t0, __temp_space
@@ -279,7 +281,7 @@ init:
 	/* if a0 < -1 then we have undefined behaviour so assume no
 	   arguments have been set up */
 	addiu	t0, a0, 1
-	bltz	t0, 1f
+	BLT_Z(t0, 1f)
 
 	/* a0 == -1 */
 	.weak	__getargs
@@ -296,9 +298,9 @@ init:
 	REG_S	zero,(a2)			/* envp[0] = 0 */
 
 .Lmain:
-	jal	main				/* call the program start function */
+	CALL	main				/* call the program start function */
 	move	a0,va0				/* pass through the exit code */
-	jal	exit				/* call libc exit to run the G++ */
+	CALL	exit				/* call libc exit to run the G++ */
 						/* destructors */
 	.end	init
 
@@ -331,7 +333,7 @@ _exit:
 
 	.global __exit
 	.type	__exit,@function
-	jal	__exit
+	CALL	__exit
 
 	/* The BREAK instruction can cope with 0xfffff, but GAS limits the
 	   range */

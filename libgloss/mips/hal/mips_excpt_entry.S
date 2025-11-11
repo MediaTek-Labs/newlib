@@ -209,8 +209,9 @@ LEAF(__exception_restore)
  * DESCRIPTION:  Load the GP context from the address in register a0
  *		 and eret.
  */
+#ifndef __clang__
 AENT(__gpctx_load_eret)
-
+#endif
 	_gpctx_load
 
 	/* Return from exception.  */

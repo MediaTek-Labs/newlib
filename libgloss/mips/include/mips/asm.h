@@ -129,7 +129,7 @@
 #define PTR_S		sw	/* store pointer */
 #define PTR_L		lw	/* load pointer */
 #define PTR_SUBU	subu	/* decrement pointer */
-#define PTR_ADDU	addu	/* increment pointer */
+#define PTR_ADDU	addiu	/* increment pointer */
 #define PTR_MFC0	mfc0	/* access CP0 pointer width register */
 #define PTR_MTC0	mtc0	/* access CP0 pointer width register */
 #define LA		la	/* load an address */
@@ -156,6 +156,27 @@
 #define PTR		.dword	/* pointer type pseudo */
 #else
 #error Unknown ABI
+#endif
+
+#if _MIPS_SIM==_ABIP32
+#define BLT_Z(reg,label) bltc reg, zero, label
+#define BLE_Z(reg,label) bgec zero, reg, label
+#define STACK_ALIGN(reg) ins reg, zero, 0, 4
+#define BGE_Z(reg,label) bgec reg, zero, label
+#define EXT_BITS(reg1,reg2,msk) li $at, msk ## _MASK; \
+                                        and reg1, reg2, $at
+#define EXT_BIT(reg1,reg2,msk) ext reg1, reg2, msk ## _SHIFT, 1
+#define CALL             balc
+#define SLTU_IMM    sltiu
+#else
+#define BLT_Z(reg,label) bltz reg, label
+#define BLE_Z(reg,label) blez reg, label
+#define STACK_ALIGN(reg) and reg, reg, ALMASK
+#define BGE_Z(reg,label) bgez reg, label
+#define EXT_BITS(reg1,reg2,msk) and reg1, reg2, msk ## _MASK
+#define EXT_BIT(reg1,reg2,msk) and reg1, reg2, msk
+#define CALL             jal
+#define SLTU_IMM    sltu
 #endif
 
 #ifdef __ASSEMBLER__

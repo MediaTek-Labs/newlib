@@ -49,12 +49,11 @@ __getargs:
 	ASM_SYSCALL (__MIPS_UHI_SYSCALL_NUM)
 
 	/* return on error (-1) */
-	blez	vt0, .Lreturn
-
+	BLE_Z (vt0,.Lreturn)
 	move	t0, vt0			/* argc: number of arguments */
 	sll	t3, t0, LOG2_SZPTR	/* Multiply by size of pointer */
 	addiu	t3, t3, ALSZ		/* Round to stack alignment */
-	and	t3, t3, ALMASK
+	STACK_ALIGN (t3)
 	PTR_SUBU  sp, sp, t3		/* make room for argv */
 	move	t1, sp			/* argv */
 	move	t2, zero
@@ -67,14 +66,14 @@ __getargs:
 
 	ASM_SYSCALL (__MIPS_UHI_SYSCALL_NUM)	/* get length of arg N */
 
-	blez	vt0, .Lreturn		/* return on error */
+	BLE_Z (vt0,.Lreturn)
 
 	addiu	vt0, vt0, 1
 	addiu	vt0, vt0, ALSZ
-	and	vt0, vt0, ALMASK
+	STACK_ALIGN (vt0)
 	PTR_SUBU sp, sp, vt0
 	sll	t3, t2, LOG2_SZPTR
-	PTR_ADDU t3, t3, t1
+	addu t3, t3, t1
 	PTR_S	sp, 0(t3)		/* argv[i] */
 
 	li	t9, __MIPS_UHI_ARGN
@@ -84,7 +83,7 @@ __getargs:
 
 	ASM_SYSCALL (__MIPS_UHI_SYSCALL_NUM)
 
-	bltz	vt0, .Lreturn		/* return on error */
+	BLT_Z (vt0, .Lreturn)		/* return on error */
 
 	addiu	t2, t2, 1
 	slt	vt0, t2, t0

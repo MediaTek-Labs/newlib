@@ -66,18 +66,18 @@ LEAF(__cpu_init)
 $Lnot_nmi:
 
 	/* Init CP0 Status, Count, Compare, Watch*, and Cause */
-	jal	  __init_cp0
+	CALL	  __init_cp0
 
 	/*
 	 * Initialise L2/L3 cache
 	 * This could be done from cached code if there is a cca override or similar
 	 */
-	jal	__init_l23cache
+	CALL	__init_l23cache
 	/* Save the L2 config register */
 	move	s0, a0
 
 	/* Initialize the L1 instruction cache */
-	jal	__init_icache
+	CALL	__init_icache
 
 	/*
 	 * The changing of Kernel mode cacheability must be done from KSEG1
@@ -100,10 +100,10 @@ $Lnot_nmi:
 	jalr	a2
 1:
 	/* Initialize the L1 data cache */
-	jal	__init_dcache
+	CALL	__init_dcache
 
 	/* Initialize the TLB */
-	jal	__init_tlb
+	CALL	__init_tlb
 
 	/* Allow everything else to be initialized via a hook */
 	.weak __boot_init_hook

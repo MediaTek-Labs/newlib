@@ -29,7 +29,9 @@
 #define _BOOTCODE
 
 #ifdef __nanomips__
+#ifndef __clang__ /* enabled by default, but syntax not supported.  */
 .module tlb
+#endif
 #endif
 
 #include <mips/regdef.h>
@@ -136,7 +138,7 @@ SEND(__tlb_size)
 SLEAF(__tlbinvalall)
 
 	mfc0	t0, C0_CONFIG
-	and	t2, t0, CFG0_MT_MASK
+	EXT_BITS (t2, t0, CFG0_MT)
 	beqz	t2, $Lexit		/* Config[MT] test, return if no TLB */
 
 	li	t1, CFG0_MT_BAT
@@ -151,7 +153,7 @@ SLEAF(__tlbinvalall)
 
 	/* Fetch size & number of sets in va0, va1 */
 	move	t8, ra
-	jal	__tlb_size
+	CALL	__tlb_size
 	move	ra, t8
 
 	/* If Config4 does not exist then use old method for invalidation */
@@ -264,7 +266,7 @@ $Llegacy_init:
 	 */
 	move	t0, zero		/* t0 == 0 if XPA disabled */
 	mfc0	t9, C0_CONFIG3		/* or not present */
-	and	t9, t1, CFG3_LPA
+	EXT_BIT (t9, t1, CFG3_LPA)
 	beqz	t9, $Lno_xpa
 
 	mfc0	t9, C0_PAGEGRAIN
@@ -281,7 +283,9 @@ $Lno_xpa:
 
 	beqz	t0, $Lskip_entryhi
 	.set	push
+#if !defined(__nanomips__) || !defined(__clang__)
 	.set	xpa
+#endif
 	mthc0	t0, C0_ENTRYHI		/* Store 0xFFFFFFFF to upper half of EntryHI */
 	.set	pop
 
@@ -292,7 +296,7 @@ $Lskip_entryhi:
 	ehb				/* tlbp, Hazard on mfc0 */
 
 	mfc0	t8, C0_INDEX
-	bgez	t8, 1b			/* Skip this address if it exists */
+	BGE_Z	(t8, 1b)		/* Skip this address if it exists */
 
 	mtc0	t2, C0_INDEX
 	ehb				/* mtc0, hazard on tlbwi */
@@ -310,7 +314,7 @@ SEND(__tlbinvalall)
 LEAF(__init_tlb)
 
 	mfc0	t0, C0_CONFIG
-	and	t2, t0, CFG0_MT_MASK
+	EXT_BITS (t2, t0, CFG0_MT)
 	beqz	t2, 1f			/* return if no tlb present */
 
 	li	t1, CFG0_MT_BAT
@@ -320,11 +324,11 @@ LEAF(__init_tlb)
 	beq	t1, t2, 1f
 
 	lui	t1, %hi(__enable_xpa)	/* Test for XPA usage */
-	ori	t1, %lo(__enable_xpa)
+	PTR_ADDU t1, t1, %lo(__enable_xpa)
 	beqz	t1, 2f
 
 	mfc0	t0, C0_CONFIG3
-	and	t0, t0, CFG3_LPA
+	EXT_BIT (t0, t0, CFG3_LPA)
 	bnez	t0, 3f
 	
 	/*
@@ -344,7 +348,7 @@ LEAF(__init_tlb)
 	mtc0	t0, C0_PAGEGRAIN
 2:
 	move	a3, ra
-	jal	__tlbinvalall
+	CALL	__tlbinvalall
 	move	ra, a3
 
 	mtc0	zero, C0_PAGEMASK

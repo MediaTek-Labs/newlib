@@ -213,9 +213,14 @@ PART_SPECIFIC_DEFINES = @part_specific_defines@
 HALCFLAGS += -g \
 	    -fdebug-prefix-map=$(srcdir)=toolchain/share/mips \
 	    -fdebug-prefix-map=$(srcdir)/include=toolchain/$(target_alias)/include \
-	    -Wa,--debug-prefix-map=$(srcdir)=toolchain/share/mips \
-	    -Wa,--debug-prefix-map=$(srcdir)/include=toolchain/$(target_alias)/include \
 	    -Werror
+
+ifeq (,$findstring(nanomips-elf-clang,$(CC)))
+  HALCFLAGS += -Wa,--debug-prefix-map=$(srcdir)=toolchain/share/mips \
+	       -Wa,--debug-prefix-map=$(srcdir)/include=toolchain/$(target_alias)/include
+else
+  HALCFLAGS += -Wno-unused-command-line-argument
+endif
 
 HALCFLAGS += -I $(srcdir)/include
 #

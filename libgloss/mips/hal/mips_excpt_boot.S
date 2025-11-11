@@ -326,7 +326,7 @@ EXPORTS(__MIPS_UHI_BAD_POINTER, 32)
 #if _MIPS_SIM==_ABIO32 || _MIPS_SIM==_ABIN32 || _MIPS_SIM==_ABIP32
 WLEAF(__convert_argv_pointers)
 	/* Early out if a0 <= 0 */
-	blez	a0, .Lend
+	BLE_Z (a0, .Lend)
 
 	/* Verify we came from 64-bit mode */
 	LA      t0, __start_ctx
@@ -339,7 +339,7 @@ WLEAF(__convert_argv_pointers)
 	sll	t1, t0, 2
 	/* Round to stack alignment */
 	addiu   t1, t1, ALSZ
-	and     t1, t1, ALMASK
+	STACK_ALIGN (t1)
 
 	PTR_SUBU sp, sp, t1
 	move	t2, sp
