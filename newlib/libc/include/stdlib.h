@@ -191,9 +191,9 @@ unsigned long long strtoull_l (const char *__restrict, char **__restrict, int,
 int	system (const char *__string);
 
 #if __SVID_VISIBLE || __XSI_VISIBLE >= 4
-long    a64l (const char *__input);
-char *  l64a (long __input);
-char *  _l64a_r (struct _reent *,long __input);
+long    a64l (const char *);
+char *  l64a (long);
+char *  _l64a_r (struct _reent *,long);
 #endif
 #if __MISC_VISIBLE
 int	on_exit (void (*__func)(int, void *),void *__arg);
